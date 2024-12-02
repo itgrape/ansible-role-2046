@@ -1,0 +1,3 @@
+{% for gpu in gpu_info %}
+NodeName={{ gpu.name }} Name=gpu File={{ gpu.file }} Type={{ gpu.type }} Count={{ gpu.count }}
+{% endfor %}

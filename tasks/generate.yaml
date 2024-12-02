@@ -1,0 +1,54 @@
+---
+
+- name: Template control node configuration
+  hosts: control
+  tasks:
+    - name: slurm.conf
+      template:
+        src: slurm.conf.j2
+        dest: "{{ config_file_path }}/slurm.conf"
+        lstrip_blocks: true
+    - name: gres.conf
+      template:
+        src: gres.conf.j2
+        dest: "{{ config_file_path }}/gres.conf"
+        lstrip_blocks: true
+    - name: minion
+      template:
+        src: minion.j2
+        dest: "{{ config_file_path }}/minion"
+        lstrip_blocks: true
+    - name: slurmdbd.conf
+      template:
+        src: slurmdbd.conf.j2
+        dest: "{{ config_file_path }}/slurmdbd.conf"
+        lstrip_blocks: true
+
+- name: Template login node configuration
+  hosts: login
+  tasks:
+    - name: slurmd_override.conf
+      template:
+        src: slurmd_override.conf.j2
+        dest: "{{ config_file_path }}/slurmd_override.conf"
+        lstrip_blocks: true
+
+- name: Template compute node configuration
+  hosts: compute
+  tasks:
+    - name: check_gpu.sh
+      template:
+        src: check_gpu.sh.j2
+        dest: "{{ config_file_path }}/check_gpu.sh"
+        lstrip_blocks: true
+        mode: 0777
+    - name: minion
+      template:
+        src: minion
+        dest: "{{ config_file_path }}/minion"
+        lstrip_blocks: true
+    - name: slurmd_override.conf
+      template:
+        src: slurmd_override.conf.j2
+        dest: "{{ config_file_path }}/slurmd_override.conf"
+        lstrip_blocks: true

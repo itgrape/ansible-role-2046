@@ -1,0 +1,21 @@
+---
+
+- name: Run generate task
+  include_tasks: generate.yaml
+  when: generate_task_enabled | default(true) | bool
+
+- name: Run pull task
+  include_tasks: pull.yaml
+  when: pull_task_enabled | default(true) | bool
+
+- name: Run pre task
+  include_tasks: pre.yaml
+  when: pre_task_enabled | default(true) | bool
+
+- name: Run run task
+  include_tasks: run.yaml
+  when: run_task_enabled | default(true) | bool
+
+- name: Run post task
+  include_tasks: post.yaml
+  when: post_task_enabled | default(true) | bool

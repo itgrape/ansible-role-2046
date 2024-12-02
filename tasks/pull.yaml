@@ -1,0 +1,27 @@
+---
+
+- name: Pull image
+  hosts: all:!mysql
+  tasks:
+    - name: Pull image
+      podman_image:
+        name: "{{ image }}"
+        state: present
+        force: yes
+    - name: Clean up unused podman images
+      command: "podman image prune -f"
+
+- name: Pull mysql image
+  hosts: mysql
+  tasks:
+    - name: Pull MySQL image with proxy
+      environment:
+        HTTPS_PROXY: "http://10.10.11.82:9500"
+      podman_image:
+        name: "{{ image }}"
+        state: present
+        force: yes
+    - name: Clean up unused podman images
+      command: "podman image prune -f"
+
+

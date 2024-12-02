@@ -1,0 +1,82 @@
+---
+
+- name: Generate and run compute podman containers dynamically
+  hosts: compute
+  podman_container:
+    name: "{{ item }}"
+    image: "{{ image }}"
+    state: started
+    network: macvlan-"{{ network_parent }}"
+    ip: "{{ hostvars[inventory_hostname]['ip'][loop.index0] }}"
+    add_hosts: "{{ (slurm_control_list + slurm_login_list + slurm_compute_list + slurm_db + mysql) | map(attribute='hostname') | join(' ') }}"
+    privileged: true
+    volumes:
+      - nas_volume:/ifs
+    hostname: "{{ item }}"
+    systemd: true
+    restart_policy: unless-stopped
+    devices:
+      - "/dev/nvidia-com/gpu=all"
+  loop: "{{ hostvars[inventory_hostname]['containers'] }}"
+  loop_control:
+    index_var: loop.index0
+
+
+- name: Run mysql
+  hosts: mysql
+  podman_container:
+    name: "{{ item }}"
+    image: "{{ image }}"
+    state: started
+    network: macvlan-"{{ network_parent }}"
+    ip: "{{ hostvars[inventory_hostname]['ip'][loop.index0] }}"
+    hostname: "{{ item }}"
+    volumes:
+      - "{{ mysql_data_volume }}"
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ mysql.password }}"
+    systemd: true
+    restart_policy: unless-stopped
+  loop: "{{ hostvars[inventory_hostname]['containers'] }}"
+  loop_control:
+    index_var: loop.index0
+
+
+- name: Run control
+  hosts: control
+  podman_container:
+    name: "{{ item }}"
+    image: "{{ image }}"
+    state: started
+    network: macvlan-"{{ network_parent }}"
+    ip: "{{ hostvars[inventory_hostname]['ip'][loop.index0] }}"
+    add_hosts: "{{ (slurm_control_list + slurm_login_list + slurm_compute_list + slurm_db + mysql) | map(attribute='hostname') | join(' ') }}"
+    privileged: true
+    hostname: "{{ item }}"
+    systemd: true
+    restart_policy: unless-stopped
+  loop: "{{ hostvars[inventory_hostname]['containers'] }}"
+  loop_control:
+    index_var: loop.index0
+
+
+- name: Run login
+  hosts: login
+  podman_container:
+    name: "{{ item }}"
+    image: "{{ image }}"
+    state: started
+    network: macvlan-"{{ network_parent }}"
+    ip: "{{ hostvars[inventory_hostname]['ip'][loop.index0] }}"
+    add_hosts: "{{ (slurm_control_list + slurm_login_list + slurm_compute_list + slurm_db + mysql) | map(attribute='hostname') | join(' ') }}"
+    privileged: true
+    volumes:
+      - nas_volume:/ifs
+      - "{{ login_auth_file_volume }}"
+    hostname: "{{ item }}"
+    systemd: true
+    restart_policy: unless-stopped
+  loop: "{{ hostvars[inventory_hostname]['containers'] }}"
+  loop_control:
+    index_var: loop.index0
+

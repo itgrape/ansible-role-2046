@@ -1,0 +1,90 @@
+generatoe_task_enabled: true
+pull_task_enabled: true
+pre_task_enabled: true
+run_task_enabled: true
+post_task_enabled: true
+
+
+gpu_monitor:
+  gpu_utilization_threshold: 20
+  gpu_memory_threshold: 20
+  check_interval: 60
+  max_history_size: 20
+
+
+config_file_path: "/tmp"
+
+
+slurm_control_list:
+  - hostname: "control-node-1"
+    ip: "10.20.20.2"
+slurm_login_list:
+  - hostname: "login-node-1"
+    ip: "10.20.20.10"
+slurm_compute_list:
+  - hostname: "c-083"
+    ip: "10.20.12.83"
+  - hostname: "c-084"
+    ip: "10.20.12.84"
+slurm_db:
+  hostname: "control-node-1"
+  ip: "10.20.20.2"
+mysql:
+  hostname: "mysql"
+  ip: "10.20.20.5"
+  password: "root"
+
+
+slurm_nodes:
+  - hostname: "login-node-1"
+  - hostname: "c-083"
+    CPUs: 104
+    Boards: 1
+    SocketsPerBoard: 2
+    CoresPerSocket: 26
+    ThreadsPerCore: 2
+    Gres: gpu:A10:8
+  - hostname: "c-084"
+    CPUs: 104
+    Boards: 1
+    SocketsPerBoard: 2
+    CoresPerSocket: 26
+    ThreadsPerCore: 2
+    Gres: gpu:A10:8
+
+slurm_partitions:
+  - name: "normal"
+    nodes: "c-0[83-84]"
+    default: YES
+    max_time: INFINITE
+    state: UP
+    oversubscribe: YES
+  - name: "login"
+    nodes: "login-node-1"
+    default: NO
+    max_time: INFINITE
+    state: DRAIN
+
+
+gpu_info:
+  - name: "c-083"
+    type: "A10"
+    count: 8
+    file: "/dev/nvidia[0-7]"
+  - name: "c-084"
+    type: "A10"
+    count: 8
+    file: "/dev/nvidia[0-7]"
+
+
+nfs_addresses:
+  - "10.20.255.1"
+  - "10.20.255.2"
+  - "10.20.255.3"
+  - "10.20.255.4"
+  - "10.20.255.5"
+  - "10.20.255.6"
+  - "10.20.255.7"
+  - "10.20.255.8"
+
+
