@@ -1,0 +1,39 @@
+---
+
+- name: Run container
+  hosts: all
+  tasks:
+    - name: Run container
+      vars:
+        all_hosts: >
+          "{{ (slurm_control_list + slurm_login_list + slurm_compute_list + [slurm_db] + [mysql]) 
+            | unique(attribute='hostname') 
+            | map('extract', ['hostname', 'ip']) 
+            | list }}"
+      containers.podman.podman_container:
+        name: "{{ item.name }}"
+        hostname: "{{ item.name }}"
+        image: "{{ image }}"
+        state: "force_restart"
+        network: "{{ item.network }}"
+        ip: "{{ item.ip }}"
+        add_hosts: "{{ all_hosts | map(attribute='hostname') | join(' ') }}"
+        privileged: true
+        restart_policy: "on-failure"
+        systemd: "true"
+        env: >
+          {{
+            item.type == 'mysql' 
+            | ternary({'MYSQL_ROOT_PASSWORD': 'root'}, {})
+          }}
+        volume: >
+          {{
+            (item.type in ['login', 'compute'] | ternary(['nas_volume:/ifs'], [])) +
+            (item.type == 'mysql' | ternary([mysql_data_volume], [])) +
+            (item.type == 'login' | ternary([login_auth_file_volume, config_file_path + '/slurmd_override.conf:/etc/systemd/system/slurmd.service.d/override.conf'], [])) +
+            (item.type == 'compute' | ternary([config_file_path + '/check_gpu.sh:/etc/slurm/check_GPU.sh', config_file_path + '/minion:/etc/salt/minion'], [])) +
+            (item.type == 'control' | ternary([config_file_path + '/slurm.conf:/etc/slurm/slurm.conf', config_file_path + '/gres.conf:/etc/slurm/gres.conf', config_file_path + '/minion:/etc/salt/minion', config_file_path + '/slurmdbd.conf:/etc/slurm/slurmdbd.conf'], []))
+          }}
+        device: "{{ item.type == 'compute' | ternary(item.gpu, omit) }}"
+      loop: "{{ containers }}"
+

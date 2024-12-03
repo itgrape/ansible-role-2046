@@ -1,5 +1,10 @@
 ---
 - name: Run Container
   become: yes
+  hosts: all
   roles:
-    - 2046
+    - name: 2046
+  tasks:
+    - name: 2046
+      include_role:
+        name: 2046

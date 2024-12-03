@@ -1,8 +1,0 @@
-generatoe_task_enabled: true
-pull_task_enabled: true
-pre_task_enabled: true
-run_task_enabled: true
-post_task_enabled: true
-
-
-config_file_path: "/home/admin"

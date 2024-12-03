@@ -1,0 +1,27 @@
+---
+
+- name: Some operation on login node
+  hosts: login
+  tasks:
+    - name: Import user
+      shell: podman exec {{ item.name }} user_import.sh
+      when: item.import_user | default(false)
+      loop: "{{ containers }}"
+
+    - name: Add network
+      shell: |
+        podman network connect {{ item.outer_network }} {{ item.name }}
+        podman exec {{ item.name }} ip addr flush dev eth1
+        podman exec {{ item.name }} ip addr add {{ item.outer_ip }} dev eth1
+        podman exec {{ item.name }} ip link set eth1 up
+        podman exec {{ item.name }} ip route add default via {{ item.outer_gateway }} dev eth1 proto static metric 200
+      when: item.type == "login"
+      loop: "{{ containers | selectattr('type', 'login') | list }}"
+
+- name: Some operation on control node
+  hosts: control
+  tasks:
+    - name: Flush db cache
+      shell: podman exec {{ item.name }} systemctl restart slurmdbd
+      when: item.type == "control"
+      loop: "{{ containers | selectattr('type', 'control') | list }}"

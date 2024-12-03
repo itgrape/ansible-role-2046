@@ -1,19 +1,8 @@
-generatoe_task_enabled: true
-pull_task_enabled: true
-pre_task_enabled: true
-run_task_enabled: true
-post_task_enabled: true
-
-
 gpu_monitor:
   gpu_utilization_threshold: 20
   gpu_memory_threshold: 20
   check_interval: 60
   max_history_size: 20
-
-
-config_file_path: "/tmp"
-
 
 slurm_control_list:
   - hostname: "control-node-1"
@@ -88,3 +77,12 @@ nfs_addresses:
   - "10.20.255.8"
 
 
+generatoe_task_enabled: true
+pull_task_enabled: true
+pre_task_enabled: true
+run_task_enabled: true
+post_task_enabled: true
+config_file_path: "/home/admin/ansible_test"
+ansible_port: 22
+ansible_user: "admin"
+ansible_password: "tang1981"
