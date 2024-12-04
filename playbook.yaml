@@ -2,5 +2,9 @@
 - name: Run Container
   become: yes
   hosts: all
+  vars_files:
+    - extra_vars/containers.yml
+    - extra_vars/slurm.yml
+    - extra_vars/deployment.yml
   roles:
     - role_2046

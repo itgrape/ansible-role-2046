@@ -1,58 +1,75 @@
 ---
 
-- name: Import config file on compute
+- name: Import compute config file
   shell: |
     podman cp {{ config_file_path }}/minion {{ item.name }}:/etc/salt/minion
     podman cp {{ config_file_path }}/slurmd_override.conf {{ item.name }}:/etc/systemd/system/slurmd.service.d/override.conf
   when: item.type == "compute"
-  loop: "{{ containers }}"
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
 
-- name: Import config file on control
+
+- name: Import control config file
   shell: |
     podman cp {{ config_file_path }}/slurm.conf {{ item.name }}:/etc/slurm/slurm.conf
     podman cp {{ config_file_path }}/gres.conf {{ item.name }}:/etc/slurm/gres.conf
     podman cp {{ config_file_path }}/slurmdbd.conf {{ item.name }}:/etc/slurm/slurmdbd.conf
     podman cp {{ config_file_path }}/minion {{ item.name }}:/etc/salt/minion
+    podman exec {{ item.name }} chown slurm /etc/slurm/slurmdbd.conf
+    podman exec {{ item.name }} chmod 644 /etc/slurm/gres.conf
+    podman exec {{ item.name }} chown slurm:slurm /etc/slurm/gres.conf
   when: item.type == "control"
-  loop: "{{ containers }}"
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
 
-- name: Import config file on login
+
+- name: Import login config file
   shell: |
     podman cp {{ config_file_path }}/slurmd_override.conf {{ item.name }}:/etc/systemd/system/slurmd.service.d/override.conf
   when: item.type == "login"
-  loop: "{{ containers }}"
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
+
 
 - name: Import user
   shell: podman exec {{ item.name }} user_import.sh
-  when: item.import_user | default(false)
-  loop: "{{ containers }}"
+  when: item.type == "login"
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
+
 
 - name: Add network
   shell: |
-    podman network connect {{ item.outer_network }} {{ item.name }}
+    podman network connect {{ hostvars[item.parent].network[1].name }} {{ item.name }}
     podman exec {{ item.name }} ip addr flush dev eth1
-    podman exec {{ item.name }} ip addr add {{ item.outer_ip }}/16 dev eth1
+    podman exec {{ item.name }} ip addr add {{ item.public_ip }} dev eth1
     podman exec {{ item.name }} ip link set eth1 up
-    podman exec {{ item.name }} ip route add default via {{ item.outer_gateway }} dev eth1 proto static metric 50
+    podman exec {{ item.name }} ip route add default via {{ hostvars[item.parent].network[1].gateway }} dev eth1 proto static metric 50
   when: item.type == "login"
-  loop: "{{ containers }}"
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
 
-- name: Flush control & db
+
+- name: Flush control
   shell: |
-    podman exec {{ item.name }} chown slurm /etc/slurm/slurmdbd.conf
+    sleep 10
     podman exec {{ item.name }} systemctl daemon-reload
     podman exec {{ item.name }} systemctl restart slurmdbd
     podman exec {{ item.name }} systemctl restart slurmctld
     sleep 10
   when: item.type == "control"
-  loop: "{{ containers }}"
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
+
 
 - name: Flush login
   shell: |
     podman exec {{ item.name }} systemctl daemon-reload
     podman exec {{ item.name }} systemctl restart slurmd
   when: item.type == "login"
-  loop: "{{ containers }}"
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
+
 
 - name: Flush compute
   shell: |
@@ -60,4 +77,5 @@
     podman exec {{ item.name }} systemctl restart slurmd
     podman exec {{ item.name }} systemctl restart salt-minion
   when: item.type == "compute"
-  loop: "{{ containers }}"
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"

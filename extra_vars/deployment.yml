@@ -1,0 +1,38 @@
+control_list:
+  - name: "control-node-1"
+    ip: "10.20.20.2"
+    type: "control"
+    parent: "cl-01"
+
+login_list:
+  - name: "login-node-1"
+    ip: "10.20.20.10"
+    public_ip: "10.10.20.2/16"
+    type: "login"
+    parent: "cl-01"
+
+mysql_list:
+  - name: "mysql"
+    ip: "10.20.20.5"
+    type: "mysql"
+    parent: "cl-01"
+
+compute_list:
+  - name: "c-083"
+    ip: "10.20.12.83"
+    type: "compute"
+    parent: "ce-01"
+
+  - name: "c-084"
+    ip: "10.20.12.84"
+    type: "compute"
+    parent: "ce-02"
+    
+
+
+
+
+
+
+
+

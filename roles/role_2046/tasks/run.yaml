@@ -1,18 +1,20 @@
 ---
 
-- name: Create a dictionary of hostname to IP
+- name: Hostname to ip
   set_fact:
-    hosts_list: "{{ hosts_list | default({}) | combine({item.hostname: item.ip}) }}"
-  loop: "{{ slurm_control_list + slurm_login_list + slurm_compute_list + slurm_db + mysql }}"
-  when: item.hostname is defined and item.ip is defined
+    hosts_list: "{{ hosts_list | default({}) | combine({item.name: item.ip}) }}"
+  loop: "{{ all_containers }}"
+  when: item.name is defined and item.ip is defined
+
 
 - name: Run container
   containers.podman.podman_container:
     name: "{{ item.name }}"
     hostname: "{{ item.name }}"
-    image: "{{ item.image }}"
+    image: "{{ images[item.type] }}"
     state: "started"
-    network: "{{ item.network }}"
+    recreate: true
+    network: "{{ hostvars[item.parent].network[0].name }}"
     ip: "{{ item.ip }}"
     etc_hosts: "{{ hosts_list }}"
     privileged: true
@@ -20,7 +22,7 @@
     systemd: "true"
     volumes: >
       [
-        {% if item.type in ['login', 'compute'] %}
+        {% if containers[item.type].nas %}
           "nas_volume:/ifs",
         {% endif %}
         {% if item.type in ['mysql'] %}
@@ -31,7 +33,9 @@
         {% endif %}
       ]
     env:
-      MYSQL_ROOT_PASSWORD: 'root'
-    device: "{{ item.type == 'compute' and item.gpu or omit }}"
-  loop: "{{ containers }}"
+      MYSQL_ROOT_PASSWORD: "{{ containers.mysql.password }}"
+    device: "{{ item.type == 'compute' and containers[item.type].gpu or omit }}"
+  
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
 

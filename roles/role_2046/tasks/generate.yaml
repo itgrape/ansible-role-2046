@@ -1,3 +1,8 @@
+- name: Create dir
+  shell: |
+    mkdir -p "{{ config_file_path }}"
+    chmod 777 "{{ config_file_path }}"
+
 - name: slurm.conf
   template:
     src: slurm.conf.j2

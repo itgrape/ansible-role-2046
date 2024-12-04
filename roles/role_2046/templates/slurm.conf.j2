@@ -1,7 +1,7 @@
 # ===slurmctld configuration
 
 ClusterName=cluster
-SlurmctldHost={{ slurm_control_list | map(attribute='hostname') | join(',') }}
+SlurmctldHost={{ control_list | map(attribute='name') | join(',') }}
 SlurmctldParameters=enable_configless
 #DisableRootJobs=NO
 #EnforcePartLimits=NO
@@ -106,15 +106,15 @@ SelectTypeParameters=CR_Core
 #
 # LOGGING AND ACCOUNTING
 AccountingStorageEnforce=limits,qos
-AccountingStorageHost={{ slurm_db[0].hostname }}
+AccountingStorageHost={{ control_list[0].name }}
 #AccountingStoragePass=
 AccountingStoragePort=6819
 AccountingStorageType=accounting_storage/slurmdbd
 #AccountingStorageUser=
 #AccountingStoreFlags=
-JobCompHost={{ mysql[0].hostname }}
+JobCompHost={{ mysql_list[0].name }}
 JobCompLoc=slurm_jobcomp_db
-JobCompPass={{ mysql[0].password }}
+JobCompPass={{ containers.mysql.password }}
 JobCompPort=3306
 JobCompType=jobcomp/mysql
 JobCompUser=root

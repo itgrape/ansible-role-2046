@@ -1,6 +1,10 @@
 ---
 
-- name: Run generate task
+- name: Combine All Hosts
+  set_fact:
+    all_containers: "{{ control_list + login_list + mysql_list + compute_list }}"
+
+- name: Generate Config File Task
   include_tasks: generate.yaml
   when: generate_task_enabled | default(true) | bool
 

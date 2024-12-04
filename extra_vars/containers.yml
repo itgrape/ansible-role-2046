@@ -1,0 +1,12 @@
+containers:
+  control:
+    nas: false
+  compute:
+    nas: true
+    gpu: "nvidia.com/gpu=all"
+  login:
+    nas: true
+  mysql:
+    nas: false
+    password: "root"
+

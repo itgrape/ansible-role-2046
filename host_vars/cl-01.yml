@@ -1,0 +1,13 @@
+network:
+  - name: "macvlan-ens786f0-br"
+    subnet: "10.0.0.0/8"
+    gateway: "10.20.20.1"
+    parent: "ens786f0-br"
+  - name: "macvlan-ens786f1"
+    subnet: "10.10.0.0/16"
+    gateway: "10.10.0.1"
+    parent: "ens786f1"
+
+volume:
+  - name: "nas_volume"
+    volume_id: 1

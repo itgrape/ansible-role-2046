@@ -2,9 +2,12 @@
 
 - name: Pull image
   containers.podman.podman_image:
-    name: "{{ image }}"
+    name: "{{ images[item.type] }}"
     state: present
     force: yes
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
+
 
 - name: Clean up unused podman images
   command: "podman image prune -f"
