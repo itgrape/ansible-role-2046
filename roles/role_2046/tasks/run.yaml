@@ -38,4 +38,4 @@
   
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
-
+  run_once: true
