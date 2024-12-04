@@ -1,0 +1,37 @@
+---
+
+- name: Create a dictionary of hostname to IP
+  set_fact:
+    hosts_list: "{{ hosts_list | default({}) | combine({item.hostname: item.ip}) }}"
+  loop: "{{ slurm_control_list + slurm_login_list + slurm_compute_list + slurm_db + mysql }}"
+  when: item.hostname is defined and item.ip is defined
+
+- name: Run container
+  containers.podman.podman_container:
+    name: "{{ item.name }}"
+    hostname: "{{ item.name }}"
+    image: "{{ item.image }}"
+    state: "started"
+    network: "{{ item.network }}"
+    ip: "{{ item.ip }}"
+    etc_hosts: "{{ hosts_list }}"
+    privileged: true
+    restart_policy: "on-failure"
+    systemd: "true"
+    volumes: >
+      [
+        {% if item.type in ['login', 'compute'] %}
+          "nas_volume:/ifs",
+        {% endif %}
+        {% if item.type in ['mysql'] %}
+          "{{ mysql_data_volume }}",
+        {% endif %}
+        {% if item.type in ['login'] %}
+          "{{ login_auth_file_volume }}",
+        {% endif %}
+      ]
+    env:
+      MYSQL_ROOT_PASSWORD: 'root'
+    device: "{{ item.type == 'compute' and item.gpu or omit }}"
+  loop: "{{ containers }}"
+

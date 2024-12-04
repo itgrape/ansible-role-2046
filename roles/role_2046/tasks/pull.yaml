@@ -1,0 +1,12 @@
+---
+
+- name: Pull image
+  containers.podman.podman_image:
+    name: "{{ image }}"
+    state: present
+    force: yes
+
+- name: Clean up unused podman images
+  command: "podman image prune -f"
+
+

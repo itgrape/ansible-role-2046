@@ -3,8 +3,4 @@
   become: yes
   hosts: all
   roles:
-    - name: 2046
-  tasks:
-    - name: 2046
-      include_role:
-        name: 2046
+    - role_2046

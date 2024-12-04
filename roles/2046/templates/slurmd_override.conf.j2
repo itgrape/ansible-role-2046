@@ -1,6 +1,0 @@
-[Service]
-Type=forking
-ExecStart=
-ExecStart=/usr/sbin/slurmd --conf-server {{ slurm_control_list | map(attribute='hostname') | map('join', [':6817']) | join(',') }}
-Restart=always
-RestartSec=10s

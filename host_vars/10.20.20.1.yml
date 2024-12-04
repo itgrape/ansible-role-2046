@@ -18,11 +18,13 @@ containers:
     network: "macvlan-ens786f0-br"
     ip: "10.20.20.2"
     nas: false
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:control"
   - name: "mysql"
     type: "mysql"
     network: "macvlan-ens786f0-br"
     ip: "10.20.20.5"
     nas: false
+    image: "mysql"
   - name: "login-node-1"
     type: "login"
     network: "macvlan-ens786f0-br"
@@ -32,4 +34,5 @@ containers:
     outer_network: "macvlan-ens786f1"
     outer_gateway: "10.10.0.1"
     outer_ip: "10.10.20.2"
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:login"
 

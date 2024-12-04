@@ -15,4 +15,5 @@ containers:
     ip: "10.20.12.83"
     nas: true
     gpu: nvidia.com/gpu=all
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
 

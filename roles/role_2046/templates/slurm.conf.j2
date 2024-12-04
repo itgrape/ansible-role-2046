@@ -106,15 +106,15 @@ SelectTypeParameters=CR_Core
 #
 # LOGGING AND ACCOUNTING
 AccountingStorageEnforce=limits,qos
-AccountingStorageHost={{ slurm_db.hostname }}
+AccountingStorageHost={{ slurm_db[0].hostname }}
 #AccountingStoragePass=
 AccountingStoragePort=6819
 AccountingStorageType=accounting_storage/slurmdbd
 #AccountingStorageUser=
 #AccountingStoreFlags=
-JobCompHost={{ mysql.hostname }}
+JobCompHost={{ mysql[0].hostname }}
 JobCompLoc=slurm_jobcomp_db
-JobCompPass={{ mysql.password }}
+JobCompPass={{ mysql[0].password }}
 JobCompPort=3306
 JobCompType=jobcomp/mysql
 JobCompUser=root
@@ -144,9 +144,10 @@ SlurmdLogFile=/var/log/slurmd.log
 #
 # NODES
 {% for node in slurm_nodes %}
-NodeName={{ node.hostname }}{% for key, value in node.items() if key != 'hostname' %}{{ key }}={{ value }}{% endfor %} State=UNKNOWN
+NodeName={{ node.hostname }}{% for key, value in node.items() if key != 'hostname' %} {{ key }}={{ value }}{% endfor %} State=UNKNOWN
 {% endfor %}
 
 {% for partition in slurm_partitions %}
-PartitionName={{ partition.name }}{% for key, value in partition.items() if key != 'name' %}{{ key }}={{ value }}{% endfor %}
+PartitionName={{ partition.name }}{% for key, value in partition.items() if key != 'name' %} {{ key }}={{ value }}{% endfor %}
+
 {% endfor %}

@@ -13,8 +13,8 @@ AuthType=auth/munge
 AuthInfo=/var/run/munge/munge.socket.2
 #
 # slurmDBD info
-DbdAddr={{ slurm_db.hostname }}
-DbdHost={{ slurm_db.hostname }}
+DbdAddr={{ slurm_db[0].hostname }}
+DbdHost={{ slurm_db[0].hostname }}
 DbdPort=6819
 SlurmUser=slurm
 #MessageTimeout=300
@@ -28,9 +28,9 @@ PidFile=/var/run/slurmdbd.pid
 #
 # Database info
 StorageType=accounting_storage/mysql
-StorageHost={{ mysql.hostname }}
+StorageHost={{ mysql[0].hostname }}
 StoragePort=3306
-StoragePass={{ mysql.password }}
+StoragePass={{ mysql[0].password }}
 StorageUser=root
 StorageLoc=slurm_accounting_db
 
