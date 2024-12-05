@@ -1,20 +1,3 @@
-slurm_nodes:
-  - hostname: "login-node-1"
-  - hostname: "c-083"
-    CPUs: 104
-    Boards: 1
-    SocketsPerBoard: 2
-    CoresPerSocket: 26
-    ThreadsPerCore: 2
-    Gres: gpu:A10:8
-  - hostname: "c-084"
-    CPUs: 104
-    Boards: 1
-    SocketsPerBoard: 2
-    CoresPerSocket: 26
-    ThreadsPerCore: 2
-    Gres: gpu:A10:8
-
 slurm_partitions:
   - name: "normal"
     Nodes: "c-0[83-84]"
@@ -28,12 +11,3 @@ slurm_partitions:
     MaxTime: "INFINITE"
     State: "DRAIN"
 
-gpu_info:
-  - name: "c-083"
-    type: "A10"
-    count: 8
-    file: "/dev/nvidia[0-7]"
-  - name: "c-084"
-    type: "A10"
-    count: 8
-    file: "/dev/nvidia[0-7]"

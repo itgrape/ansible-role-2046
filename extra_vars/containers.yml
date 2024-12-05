@@ -1,12 +1,21 @@
 containers:
   control:
     nas: false
-  compute:
-    nas: true
-    gpu: "nvidia.com/gpu=all"
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:control"
   login:
     nas: true
+    slurm_node: true
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:login"
   mysql:
     nas: false
     password: "root"
-
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:mysql"
+  compute_gpu:
+    nas: true
+    gpu: true
+    slurm_node: true
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
+  compute_no_gpu:
+    nas: true
+    slurm_node: true
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"

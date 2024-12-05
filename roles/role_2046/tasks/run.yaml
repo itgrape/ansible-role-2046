@@ -11,7 +11,7 @@
   containers.podman.podman_container:
     name: "{{ item.name }}"
     hostname: "{{ item.name }}"
-    image: "{{ images[item.type] }}"
+    image: "{{ containers[item.type].image }}"
     state: "started"
     recreate: true
     network: "{{ hostvars[item.parent].network[0].name }}"
@@ -23,19 +23,21 @@
     volumes: >
       [
         {% if containers[item.type].nas %}
-          "nas_volume:/ifs",
+          "nas_volume:{{ container_nas_path }}",
+        {% endif %}
+        {% if item.type in ['control'] %}
+          "{{ state_file_volume }}:/var/spool/slurmctld",
         {% endif %}
         {% if item.type in ['mysql'] %}
-          "{{ mysql_data_volume }}",
+          "{{ mysql_data_volume }}:/var/lib/mysql",
         {% endif %}
         {% if item.type in ['login'] %}
-          "{{ login_auth_file_volume }}",
+          "{{ login_auth_file_volume }}:/auth_files",
         {% endif %}
       ]
     env:
       MYSQL_ROOT_PASSWORD: "{{ containers.mysql.password }}"
-    device: "{{ item.type == 'compute' and containers[item.type].gpu or omit }}"
-  
+    device: "{{ 'nvidia.com/gpu=all' if containers[item.type].gpu | default(false) else omit }}"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
   run_once: true

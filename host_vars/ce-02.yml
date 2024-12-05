@@ -4,7 +4,18 @@ network:
     gateway: "10.20.20.1"
     parent: "ens3f1np1"
 
+
 volume:
   - name: "nas_volume"
     volume_id: 3
-  
+
+
+hardware_info:
+  CPUs: 104
+  Boards: 1
+  SocketsPerBoard: 2
+  CoresPerSocket: 26
+  ThreadsPerCore: 2
+  GPU:
+    type: A10
+    num: 8

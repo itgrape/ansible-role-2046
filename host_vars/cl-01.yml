@@ -11,3 +11,11 @@ network:
 volume:
   - name: "nas_volume"
     volume_id: 1
+
+
+hardware_info:
+  CPUs: 40
+  Boards: 1
+  SocketsPerBoard: 2
+  CoresPerSocket: 10
+  ThreadsPerCore: 2

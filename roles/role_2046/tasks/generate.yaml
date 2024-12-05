@@ -1,7 +1,7 @@
 - name: Create dir
   shell: |
-    mkdir -p "{{ config_file_path }}"
-    chmod 777 "{{ config_file_path }}"
+    mkdir -p "{{ config_file_path }} {{ state_file_volume }} {{ login_auth_file_volume }} {{ mysql_data_volume }}"
+    chmod 776 "{{ config_file_path }} {{ state_file_volume }} {{ login_auth_file_volume }} {{ mysql_data_volume }}"
 
 - name: slurm.conf
   template:

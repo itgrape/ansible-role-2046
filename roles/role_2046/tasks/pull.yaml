@@ -2,7 +2,7 @@
 
 - name: Pull image
   containers.podman.podman_image:
-    name: "{{ images[item.type] }}"
+    name: "{{ containers[item.type].image }}"
     state: present
     force: yes
   delegate_to: "{{ item.parent }}"

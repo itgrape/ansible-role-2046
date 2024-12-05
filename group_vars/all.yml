@@ -12,19 +12,15 @@ nfs_addresses:
   - "10.20.255.7"
   - "10.20.255.8"
 
-generate_task_enabled: false
+generate_task_enabled: true
 pull_task_enabled: false
 pre_task_enabled: true
 run_task_enabled: true
 post_task_enabled: true
+
 config_file_path: "/home/admin/ansible_slurm_config_file"
+state_file_volume: "/home/admin/state_file"
+mysql_data_volume: "/home/admin/mysql_data"
+login_auth_file_volume: "/home/admin/auth_files"
 
-mysql_data_volume: "/home/admin/mysql_data:/var/lib/mysql"
-login_auth_file_volume: "/home/admin/auth_files:/auth_files"
-
-images:
-  control: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:control"
-  login: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:login"
-  compute: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
-  mysql: "mysql"
-
+container_nas_path: "/ifs"

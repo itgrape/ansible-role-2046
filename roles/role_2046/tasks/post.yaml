@@ -7,6 +7,7 @@
   when: item.type == "compute"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
+  run_once: true
 
 
 - name: Import control config file
@@ -18,9 +19,12 @@
     podman exec {{ item.name }} chown slurm /etc/slurm/slurmdbd.conf
     podman exec {{ item.name }} chmod 644 /etc/slurm/gres.conf
     podman exec {{ item.name }} chown slurm:slurm /etc/slurm/gres.conf
+    podman exec {{ item.name }} chown -R slurm:slurm /var/spool/slurmctld
+    podman exec {{ item.name }} chmod -R 750 /var/spool/slurmctld
   when: item.type == "control"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
+  run_once: true
 
 
 - name: Import login config file
@@ -29,6 +33,7 @@
   when: item.type == "login"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
+  run_once: true
 
 
 - name: Import user
@@ -36,6 +41,7 @@
   when: item.type == "login"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
+  run_once: true
 
 
 - name: Add network
@@ -48,18 +54,18 @@
   when: item.type == "login"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
+  run_once: true
 
 
 - name: Flush control
   shell: |
-    sleep 10
     podman exec {{ item.name }} systemctl daemon-reload
-    podman exec {{ item.name }} systemctl restart slurmdbd
     podman exec {{ item.name }} systemctl restart slurmctld
-    sleep 10
+    podman exec {{ item.name }} systemctl restart slurmdbd
   when: item.type == "control"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
+  run_once: true
 
 
 - name: Flush login
@@ -69,6 +75,7 @@
   when: item.type == "login"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
+  run_once: true
 
 
 - name: Flush compute
@@ -79,3 +86,14 @@
   when: item.type == "compute"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
+  run_once: true
+
+
+- name: Reload state file
+  shell: |
+    sleep 100
+    podman exec {{ item.name }} scontrol reconfigure
+  when: item.type == "control"
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
+  run_once: true
