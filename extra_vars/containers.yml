@@ -10,9 +10,20 @@ containers:
     nas: false
     password: "root"
     image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:mysql"
-  compute_gpu:
+  compute_gpu_1:
     nas: true
-    gpu: true
+    gpu_enabled: true
+    gpu_info:
+      type: A10
+      num: 3
+    slurm_node: true
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
+  compute_gpu_2:
+    nas: true
+    gpu_enabled: true
+    gpu_info:
+      type: A10
+      num: 2
     slurm_node: true
     image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
   compute_no_gpu:

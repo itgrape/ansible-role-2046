@@ -28,6 +28,6 @@
     options:
       - "type=nfs"
       - "o=rw"
-      - "device={{ nfs_addresses[item.volume_id | int - 1] }}:/ifs"
+      - "device={{ nfs_addresses[item.volume_id | int - 1] }}:{{ remote_nas_path }}"
   loop: "{{ volume }}"
 

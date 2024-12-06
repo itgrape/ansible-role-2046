@@ -17,5 +17,7 @@ hardware_info:
   CoresPerSocket: 26
   ThreadsPerCore: 2
   GPU:
-    type: A10
-    num: 8
+    - type: A10
+      index_start: 0
+      index_end: 7
+

@@ -23,4 +23,5 @@ state_file_volume: "/home/admin/state_file"
 mysql_data_volume: "/home/admin/mysql_data"
 login_auth_file_volume: "/home/admin/auth_files"
 
+remote_nas_path: "/ifs"
 container_nas_path: "/ifs"

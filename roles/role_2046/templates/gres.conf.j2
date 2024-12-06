@@ -1,5 +1,5 @@
 {% for c in compute_list %}
-{% if containers[c.type].gpu | default(false) %}
-NodeName={{ c.name }} Name=gpu File=/dev/nvidia[0-{{ hostvars[c.parent].hardware_info.GPU.num-1 }}] Type={{ hostvars[c.parent].hardware_info.GPU.type }} Count={{ hostvars[c.parent].hardware_info.GPU.num }}
+{% if containers[c.type].gpu_enabled | default(false) %}
+NodeName={{ c.name }} Name=gpu File=/dev/nvidia[{{ gpu_allocations[c.name] }}] Type={{ containers[c.type].gpu_info.type }} Count={{ containers[c.type].gpu_info.num }}
 {% endif %}
 {% endfor %}

@@ -145,7 +145,7 @@ SlurmdLogFile=/var/log/slurmd.log
 # NODES
 {% for c in login_list + compute_list %}
 {% if containers[c.type].slurm_node | default(false) %}
-NodeName={{ c.name }} CPUs={{ hostvars[c.parent].hardware_info.CPUs }} Boards={{ hostvars[c.parent].hardware_info.Boards }} SocketsPerBoard={{ hostvars[c.parent].hardware_info.SocketsPerBoard }} CoresPerSocket={{ hostvars[c.parent].hardware_info.CoresPerSocket }} ThreadsPerCore={{ hostvars[c.parent].hardware_info.ThreadsPerCore }} {% if containers[c.type].gpu | default(false) %}Gres=gpu:{{ hostvars[c.parent].hardware_info.GPU.type }}:{{ hostvars[c.parent].hardware_info.GPU.num }}{% endif %} State=UNKNOWN
+NodeName={{ c.name }} CPUs={{ hostvars[c.parent].hardware_info.CPUs }} Boards={{ hostvars[c.parent].hardware_info.Boards }} SocketsPerBoard={{ hostvars[c.parent].hardware_info.SocketsPerBoard }} CoresPerSocket={{ hostvars[c.parent].hardware_info.CoresPerSocket }} ThreadsPerCore={{ hostvars[c.parent].hardware_info.ThreadsPerCore }} {% if containers[c.type].gpu_enabled | default(false) %}Gres=gpu:{{ containers[c.type].gpu_info.type }}:{{ containers[c.type].gpu_info.num }}{% endif %} State=UNKNOWN
 {% endif %}
 {% endfor %}
 

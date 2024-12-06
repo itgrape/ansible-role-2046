@@ -4,6 +4,38 @@
   set_fact:
     all_containers: "{{ control_list + login_list + mysql_list + compute_list }}"
 
+- name: Set fact for hostname to ip
+  set_fact:
+    hosts_list: "{{ hosts_list | default({}) | combine({item.name: item.ip}) }}"
+  loop: "{{ all_containers }}"
+  when: item.name is defined and item.ip is defined
+
+- name: Initialize GPU allocation facts
+  set_fact:
+    current_gpu_index: {}
+    gpu_allocations: {}
+
+- name: Assign GPU to containers
+  set_fact:
+    gpu_allocations: "{{ gpu_allocations | combine({ item.name:
+      (range(
+          ((gpu_range | selectattr('type', 'equalto', containers[item.type].gpu_info.type) | first).index_start | int) + 
+          (current_gpu_index[containers[item.type].gpu_info.type] | default(0) | int),
+          ((gpu_range | selectattr('type', 'equalto', containers[item.type].gpu_info.type) | first).index_start | int) + 
+          (current_gpu_index[containers[item.type].gpu_info.type] | default(0) | int) + 
+          containers[item.type].gpu_info.num
+        ) | list | map('string') | join(','))
+    }) }}"
+    current_gpu_index: "{{ current_gpu_index | combine({ containers[item.type].gpu_info.type: (current_gpu_index[containers[item.type].gpu_info.type] | default(0) | int) + containers[item.type].gpu_info.num }) }}"
+  when: containers[item.type].gpu_enabled | default(false)
+  delegate_to: "{{ item.parent }}"
+  loop: "{{ all_containers }}"
+  run_once: true
+  vars:
+    gpu_range: "{{ hostvars[item.parent].hardware_info.GPU }}"
+
+
+
 - name: Generate Config File Task
   include_tasks: generate.yaml
   when: generate_task_enabled | default(true) | bool
@@ -12,14 +44,14 @@
   include_tasks: pull.yaml
   when: pull_task_enabled | default(true) | bool
 
-- name: Run pre task
-  include_tasks: pre.yaml
+- name: Run run_pre task
+  include_tasks: run_pre.yaml
   when: pre_task_enabled | default(true) | bool
 
 - name: Run run task
   include_tasks: run.yaml
   when: run_task_enabled | default(true) | bool
 
-- name: Run post task
-  include_tasks: post.yaml
+- name: Run run_post task
+  include_tasks: run_post.yaml
   when: post_task_enabled | default(true) | bool

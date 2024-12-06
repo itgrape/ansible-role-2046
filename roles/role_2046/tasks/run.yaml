@@ -1,12 +1,5 @@
 ---
 
-- name: Hostname to ip
-  set_fact:
-    hosts_list: "{{ hosts_list | default({}) | combine({item.name: item.ip}) }}"
-  loop: "{{ all_containers }}"
-  when: item.name is defined and item.ip is defined
-
-
 - name: Run container
   containers.podman.podman_container:
     name: "{{ item.name }}"
@@ -17,13 +10,13 @@
     network: "{{ hostvars[item.parent].network[0].name }}"
     ip: "{{ item.ip }}"
     etc_hosts: "{{ hosts_list }}"
-    privileged: true
+    privileged: "{{ true if item.type=='login' else false }}"
     restart_policy: "on-failure"
     systemd: "true"
     volumes: >
       [
         {% if containers[item.type].nas %}
-          "nas_volume:{{ container_nas_path }}",
+          "{{ hostvars[item.parent].volume[0].name }}:{{ container_nas_path }}",
         {% endif %}
         {% if item.type in ['control'] %}
           "{{ state_file_volume }}:/var/spool/slurmctld",
@@ -37,7 +30,7 @@
       ]
     env:
       MYSQL_ROOT_PASSWORD: "{{ containers.mysql.password }}"
-    device: "{{ 'nvidia.com/gpu=all' if containers[item.type].gpu | default(false) else omit }}"
+    gpus: "{{ gpu_allocations.get(item.name, omit) }}"
   delegate_to: "{{ item.parent }}"
   loop: "{{ all_containers }}"
   run_once: true

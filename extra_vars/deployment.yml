@@ -20,11 +20,10 @@ mysql_list:
 compute_list:
   - name: "c-083"
     ip: "10.20.12.83"
-    type: "compute_gpu"
+    type: "compute_gpu_1"
     parent: "ce-01"
 
   - name: "c-084"
     ip: "10.20.12.84"
-    type: "compute_no_gpu"
+    type: "compute_gpu_2"
     parent: "ce-02"
-    
