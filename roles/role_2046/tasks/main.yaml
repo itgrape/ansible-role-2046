@@ -1,57 +1,24 @@
 ---
+- name: === Set Vars Task Begin ===
+  include_tasks: set_vars.yaml
+  when: task_set_vars_enabled | default(true) | bool
 
-- name: Combine All Hosts
-  set_fact:
-    all_containers: "{{ control_list + login_list + mysql_list + compute_list }}"
+- name: === Generate Templates Task Begin ===
+  include_tasks: generate_templates.yaml
+  when: task_generate_templates_enabled | default(true) | bool
 
-- name: Set fact for hostname to ip
-  set_fact:
-    hosts_list: "{{ hosts_list | default({}) | combine({item.name: item.ip}) }}"
-  loop: "{{ all_containers }}"
-  when: item.name is defined and item.ip is defined
+- name: === Pull Image Task Begin ===
+  include_tasks: pull_image.yaml
+  when: task_pull_image_enabled | default(true) | bool
 
-- name: Initialize GPU allocation facts
-  set_fact:
-    current_gpu_index: {}
-    gpu_allocations: {}
+- name: === Before Running Task Begin ===
+  include_tasks: before_running.yaml
+  when: task_before_running_enabled | default(true) | bool
 
-- name: Assign GPU to containers
-  set_fact:
-    gpu_allocations: "{{ gpu_allocations | combine({ item.name:
-      (range(
-          ((gpu_range | selectattr('type', 'equalto', containers[item.type].gpu_info.type) | first).index_start | int) + 
-          (current_gpu_index[containers[item.type].gpu_info.type] | default(0) | int),
-          ((gpu_range | selectattr('type', 'equalto', containers[item.type].gpu_info.type) | first).index_start | int) + 
-          (current_gpu_index[containers[item.type].gpu_info.type] | default(0) | int) + 
-          containers[item.type].gpu_info.num
-        ) | list | map('string') | join(','))
-    }) }}"
-    current_gpu_index: "{{ current_gpu_index | combine({ containers[item.type].gpu_info.type: (current_gpu_index[containers[item.type].gpu_info.type] | default(0) | int) + containers[item.type].gpu_info.num }) }}"
-  when: containers[item.type].gpu_enabled | default(false)
-  delegate_to: "{{ item.parent }}"
-  loop: "{{ all_containers }}"
-  run_once: true
-  vars:
-    gpu_range: "{{ hostvars[item.parent].hardware_info.GPU }}"
+- name: === Runtime Task Begin ===
+  include_tasks: runtime.yaml
+  when: task_runtime_enabled | default(true) | bool
 
-
-
-- name: Generate Config File Task
-  include_tasks: generate.yaml
-  when: generate_task_enabled | default(true) | bool
-
-- name: Run pull task
-  include_tasks: pull.yaml
-  when: pull_task_enabled | default(true) | bool
-
-- name: Run run_pre task
-  include_tasks: run_pre.yaml
-  when: pre_task_enabled | default(true) | bool
-
-- name: Run run task
-  include_tasks: run.yaml
-  when: run_task_enabled | default(true) | bool
-
-- name: Run run_post task
-  include_tasks: run_post.yaml
-  when: post_task_enabled | default(true) | bool
+- name: === After Running Task Begin ===
+  include_tasks: after_running.yaml
+  when: task_after_running_enabled | default(true) | bool

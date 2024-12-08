@@ -1,0 +1,50 @@
+virtual_machines:
+  control-node-01:
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:control"
+    ip: "10.20.20.2"
+    public_ip: null
+    memory: 20
+    cpu_num: 10
+    gpu_num: 0
+    nas_enabled: false
+  login-node-01:
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:login"
+    ip: "10.20.20.10"
+    public_ip: "10.10.20.2/16"
+    memory: 20
+    cpu_num: 10
+    gpu_num: 0
+    nas_enabled: true
+  database-node-01:
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:mysql"
+    ip: "10.20.20.5"
+    public_ip: null
+    memory: 20
+    cpu_num: 10
+    gpu_num: 0
+    nas_enabled: false
+  gpu-node-01:
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
+    ip: "10.20.12.1"
+    public_ip: null
+    memory: 100
+    cpu_num: 100
+    gpu_num: 8
+    nas_enabled: true
+  gpu-node-02:
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
+    ip: "10.20.12.2"
+    public_ip: null
+    memory: 40
+    cpu_num: 50
+    gpu_num: 4
+    nas_enabled: true
+  gpu-node-03:
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
+    ip: "10.20.12.3"
+    public_ip: null
+    memory: 40
+    cpu_num: 50
+    gpu_num: 4
+    nas_enabled: true
+

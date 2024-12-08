@@ -1,0 +1,29 @@
+nfs_num: 8
+nfs_addresses:
+  - "10.20.255.1"
+  - "10.20.255.2"
+  - "10.20.255.3"
+  - "10.20.255.4"
+  - "10.20.255.5"
+  - "10.20.255.6"
+  - "10.20.255.7"
+  - "10.20.255.8"
+
+task_debug: true
+
+task_set_vars_enabled: true
+task_generate_templates_enabled: true
+task_pull_image_enabled: false
+task_before_running_enabled: true
+task_runtime_enabled: true
+task_after_running_enabled: true
+
+config_file_path: "/home/admin/slurm_config_file"
+state_file_volume: "/home/admin/state_file"
+mysql_data_volume: "/home/admin/mysql_data"
+login_auth_file_volume: "/home/admin/auth_files"
+
+remote_nas_path: "/ifs"
+container_nas_path: "/ifs"
+
+mysql_root_password: "root"

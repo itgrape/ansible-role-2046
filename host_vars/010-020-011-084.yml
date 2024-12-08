@@ -1,14 +1,7 @@
 network:
-  - name: "macvlan-ens3f1np1"
+  - interface: "ens3f1np1"
     subnet: "10.20.0.0/16"
     gateway: "10.20.20.1"
-    parent: "ens3f1np1"
-
-
-volume:
-  - name: "nas_volume"
-    volume_id: 2
-
 
 hardware_info:
   CPUs: 104
@@ -16,8 +9,7 @@ hardware_info:
   SocketsPerBoard: 2
   CoresPerSocket: 26
   ThreadsPerCore: 2
+  Memory: 376
   GPU:
-    - type: A10
-      index_start: 0
-      index_end: 7
-
+    type: "A10"
+    num: 8

@@ -1,0 +1,91 @@
+---
+- name: import compute file
+  shell: |
+    podman cp {{ config_file_path }}/minion {{ item.virtual_machine_name }}:/etc/salt/minion
+    podman cp {{ config_file_path }}/slurmd_override.conf {{ item.virtual_machine_name }}:/etc/systemd/system/slurmd.service.d/override.conf
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ compute_node_list }}"
+  run_once: true
+
+
+- name: import login file
+  shell: |
+    podman cp {{ config_file_path }}/slurmd_override.conf {{ item.virtual_machine_name }}:/etc/systemd/system/slurmd.service.d/override.conf
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ login_node_list }}"
+  run_once: true
+
+
+- name: import control file
+  shell: |
+    podman cp {{ config_file_path }}/slurm.conf {{ item.virtual_machine_name }}:/etc/slurm/slurm.conf
+    podman cp {{ config_file_path }}/gres.conf {{ item.virtual_machine_name }}:/etc/slurm/gres.conf
+    podman cp {{ config_file_path }}/slurmdbd.conf {{ item.virtual_machine_name }}:/etc/slurm/slurmdbd.conf
+    podman cp {{ config_file_path }}/minion {{ item.virtual_machine_name }}:/etc/salt/minion
+    podman exec {{ item.virtual_machine_name }} chown slurm /etc/slurm/slurmdbd.conf
+    podman exec {{ item.virtual_machine_name }} chmod 644 /etc/slurm/gres.conf
+    podman exec {{ item.virtual_machine_name }} chown slurm:slurm /etc/slurm/gres.conf
+    podman exec {{ item.virtual_machine_name }} chown -R slurm:slurm /var/spool/slurmctld
+    podman exec {{ item.virtual_machine_name }} chmod -R 750 /var/spool/slurmctld
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ control_node_list }}"
+  run_once: true
+
+
+- name: import user
+  shell: podman exec {{ item.virtual_machine_name }} user_import.sh
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ login_node_list }}"
+  run_once: true
+
+
+- name: attach extra network to login node
+  shell: |
+    podman network connect macvlan-{{ hostvars[item.real_machine_name].network[1].interface }} {{ item.virtual_machine_name }}
+    podman exec {{ item.virtual_machine_name }} ip addr flush dev eth1
+    podman exec {{ item.virtual_machine_name }} ip addr add {{ virtual_machines[item.virtual_machine_name].public_ip }} dev eth1
+    podman exec {{ item.virtual_machine_name }} ip link set eth1 up
+    podman exec {{ item.virtual_machine_name }} ip route add default via {{ hostvars[item.real_machine_name].network[1].gateway }} dev eth1 proto static metric 50
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ login_node_list }}"
+  run_once: true
+
+
+- name: flush control node
+  shell: |
+    podman exec {{ item.virtual_machine_name }} systemctl daemon-reload
+    podman exec {{ item.virtual_machine_name }} systemctl restart slurmctld
+    podman exec {{ item.virtual_machine_name }} systemctl restart slurmdbd
+    podman exec {{ item.virtual_machine_name }} systemctl restart salt-minion
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ control_node_list }}"
+  run_once: true
+
+
+- name: flush login node
+  shell: |
+    podman exec {{ item.virtual_machine_name }} systemctl daemon-reload
+    podman exec {{ item.virtual_machine_name }} systemctl restart slurmd
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ login_node_list }}"
+  run_once: true
+
+
+- name: flush compute node
+  shell: |
+    podman exec {{ item.virtual_machine_name }} systemctl daemon-reload
+    podman exec {{ item.virtual_machine_name }} systemctl restart slurmd
+    podman exec {{ item.virtual_machine_name }} systemctl restart salt-minion
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ compute_node_list }}"
+  run_once: true
+
+
+- name: Reload state file
+  shell: |
+    sleep 30
+    podman exec {{ item.virtual_machine_name }} scontrol reconfigure
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ control_node_list }}"
+  run_once: true
+

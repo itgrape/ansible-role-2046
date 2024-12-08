@@ -1,0 +1,70 @@
+---
+- name: combine all virtual machines
+  set_fact:
+    vms: "{{ control_node_list + login_node_list + database_node_list + compute_node_list }}"
+
+
+- name: set fact for hostname to ip
+  set_fact:
+    hosts_list: "{{ hosts_list | default({}) | combine({item.virtual_machine_name: virtual_machines[item.virtual_machine_name].ip}) }}"
+  loop: "{{ vms }}"
+
+
+- name: initial gpu and cpu allocation variable
+  set_fact:
+    current_gpu_index: {}
+    gpu_allocations: {}
+    current_cpu_index: {}
+    cpu_allocations: {}
+- name: calucate gpu and cpu allocation variable
+  set_fact:
+    gpu_allocations: "{{ gpu_allocations | combine({ item.virtual_machine_name: gpu_indices }) }}"
+    current_gpu_index: "{{ current_gpu_index | combine({ item.real_machine_name: new_gpu_index }) }}"
+    cpu_allocations: "{{ cpu_allocations | combine({ item.virtual_machine_name: cpu_indices }) }}"
+    current_cpu_index: "{{ current_cpu_index | combine({ item.real_machine_name: new_cpu_index }) }}"
+  vars:
+    gpu_indices: >-
+      {{
+        range(
+          (current_gpu_index[item.real_machine_name] | default(0)) | int,
+          ((current_gpu_index[item.real_machine_name] | default(0)) | int) + (virtual_machines[item.virtual_machine_name].gpu_num | int)
+        ) | list | map('string') | join(',')
+      }}
+    new_gpu_index: "{{ (current_gpu_index[item.real_machine_name] | default(0) | int) + (virtual_machines[item.virtual_machine_name].gpu_num | int) }}"
+    cpu_start: "{{ (current_cpu_index[item.real_machine_name] | default(0)) | int }}"
+    cpu_end: "{{ ((current_cpu_index[item.real_machine_name] | default(0)) | int) + (virtual_machines[item.virtual_machine_name].cpu_num | int) - 1 }}"
+    cpu_indices: "{{ cpu_start ~ '-' ~ cpu_end }}"
+    new_cpu_index: "{{ (current_cpu_index[item.real_machine_name] | default(0) | int) + (virtual_machines[item.virtual_machine_name].cpu_num | int) }}"
+  when:
+    - virtual_machines[item.virtual_machine_name].gpu_num is defined
+    - virtual_machines[item.virtual_machine_name].gpu_num > 0
+    - virtual_machines[item.virtual_machine_name].cpu_num is defined
+    - virtual_machines[item.virtual_machine_name].cpu_num > 0
+  loop: "{{ vms }}"
+- name: Debug gpu info
+  debug:
+    msg: "{{ gpu_allocations }}"
+  when:
+    - gpu_allocations is defined
+    - task_debug
+- name: Debug cpu info
+  debug:
+    msg: "{{ cpu_allocations }}"
+  when:
+    - cpu_allocations is defined
+    - task_debug
+
+
+- name: calculate volume name base hostname
+  set_fact:
+    nfs_volume_address: "{{ nfs_addresses[(inventory_hostname.split('-')[-1] | int) % 8] }}"
+  when:
+    - inventory_hostname is defined
+    - (inventory_hostname.split('-')[-1] | int) is defined
+- name: Debug nfs volume
+  debug:
+    msg: "host {{ inventory_hostname }}'s nfs address is {{ nfs_volume_address }}"
+  when:
+    - nfs_volume_address is defined
+    - task_debug
+

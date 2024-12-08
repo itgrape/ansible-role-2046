@@ -1,0 +1,12 @@
+slurm_partitions:
+  - name: "login"
+    Nodes: "login-node-01"
+    Default: "NO"
+    MaxTime: "INFINITE"
+    State: "DRAIN"
+  - name: "normal"
+    Nodes: "gpu-node-[01-03]"
+    Default: "YES"
+    MaxTime: "INFINITE"
+    State: "UP"
+    Oversubscribe: "YES"

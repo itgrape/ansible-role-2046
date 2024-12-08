@@ -1,0 +1,14 @@
+---
+
+- name: pull image
+  containers.podman.podman_image:
+    name: "{{ virtual_machines[item.virtual_machine_name].image }}"
+    state: present
+    force: yes
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ vms }}"
+
+
+- name: clean up unused podman images
+  command: "podman image prune -f"
+

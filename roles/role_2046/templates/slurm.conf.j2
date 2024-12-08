@@ -1,8 +1,10 @@
 # ===slurmctld configuration
 
 ClusterName=cluster
-SlurmctldHost={{ control_list | map(attribute='name') | join(',') }}
+SlurmctldHost={{ control_node_list | map(attribute='virtual_machine_name') | join(',') }}
 SlurmctldParameters=enable_configless
+AuthType=auth/munge
+AuthInfo=cred_expire=2400
 #DisableRootJobs=NO
 #EnforcePartLimits=NO
 Epilog=/etc/slurm/epilog.sh
@@ -106,18 +108,18 @@ SelectTypeParameters=CR_Core
 #
 # LOGGING AND ACCOUNTING
 AccountingStorageEnforce=limits,qos
-AccountingStorageHost={{ control_list[0].name }}
+AccountingStorageHost={{ control_node_list[0].virtual_machine_name }}
 #AccountingStoragePass=
 AccountingStoragePort=6819
 AccountingStorageType=accounting_storage/slurmdbd
 #AccountingStorageUser=
 #AccountingStoreFlags=
-JobCompHost={{ mysql_list[0].name }}
-JobCompLoc=slurm_jobcomp_db
-JobCompPass={{ containers.mysql.password }}
-JobCompPort=3306
-JobCompType=jobcomp/mysql
-JobCompUser=root
+#JobCompHost=
+#JobCompLoc=slurm_jobcomp_db
+#JobCompPass=
+#JobCompPort=3306
+#JobCompType=jobcomp/mysql
+#JobCompUser=
 #JobContainerType=
 JobAcctGatherFrequency=30
 JobAcctGatherType=jobacct_gather/cgroup
@@ -143,11 +145,10 @@ SlurmdLogFile=/var/log/slurmd.log
 #
 #
 # NODES
-{% for c in login_list + compute_list %}
-{% if containers[c.type].slurm_node | default(false) %}
-NodeName={{ c.name }} CPUs={{ hostvars[c.parent].hardware_info.CPUs }} Boards={{ hostvars[c.parent].hardware_info.Boards }} SocketsPerBoard={{ hostvars[c.parent].hardware_info.SocketsPerBoard }} CoresPerSocket={{ hostvars[c.parent].hardware_info.CoresPerSocket }} ThreadsPerCore={{ hostvars[c.parent].hardware_info.ThreadsPerCore }} {% if containers[c.type].gpu_enabled | default(false) %}Gres=gpu:{{ containers[c.type].gpu_info.type }}:{{ containers[c.type].gpu_info.num }}{% endif %} State=UNKNOWN
-{% endif %}
+{% for c in login_node_list + compute_node_list %}
+NodeName={{ c.virtual_machine_name }} CPUs={{ hostvars[c.real_machine_name].hardware_info.CPUs }} RealMemory={{ virtual_machines[c.virtual_machine_name].memory * 1024 }} Boards={{ hostvars[c.real_machine_name].hardware_info.Boards }} SocketsPerBoard={{ hostvars[c.real_machine_name].hardware_info.SocketsPerBoard }} CoresPerSocket={{ hostvars[c.real_machine_name].hardware_info.CoresPerSocket }} ThreadsPerCore={{ hostvars[c.real_machine_name].hardware_info.ThreadsPerCore }} {% if virtual_machines[c.virtual_machine_name].gpu_num is defined and virtual_machines[c.virtual_machine_name].gpu_num > 0 and hostvars[c.real_machine_name].hardware_info.GPU.type is not none %}Gres=gpu:{{ hostvars[c.real_machine_name].hardware_info.GPU.type }}:{{ virtual_machines[c.virtual_machine_name].gpu_num }}{% endif %} State=UNKNOWN
 {% endfor %}
+
 
 {% for partition in slurm_partitions %}
 PartitionName={{ partition.name }}{% for key, value in partition.items() if key != 'name' %} {{ key }}={{ value }}{% endfor %}

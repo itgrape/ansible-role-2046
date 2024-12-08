@@ -1,6 +1,6 @@
 [Service]
 Type=forking
 ExecStart=
-ExecStart=/usr/sbin/slurmd --conf-server {{ control_list | map(attribute='name') | join(':6817,') }}:6817
+ExecStart=/usr/sbin/slurmd --conf-server {{ control_node_list | map(attribute='virtual_machine_name') | join(':6817,') }}:6817
 Restart=always
 RestartSec=10s

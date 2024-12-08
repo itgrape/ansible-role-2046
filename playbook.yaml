@@ -3,8 +3,9 @@
   become: yes
   hosts: all
   vars_files:
-    - extra_vars/containers.yml
-    - extra_vars/slurm.yml
-    - extra_vars/deployment.yml
+    - extra_vars/config.yml
+    - virtual_machine_vars/deployment.yml
+    - virtual_machine_vars/partitions.yml
+    - virtual_machine_vars/virtual_machines.yml
   roles:
     - role_2046

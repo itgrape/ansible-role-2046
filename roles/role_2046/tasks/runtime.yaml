@@ -1,0 +1,40 @@
+---
+- name: run container
+  containers.podman.podman_container:
+    name: "{{ item.virtual_machine_name }}"
+    hostname: "{{ item.virtual_machine_name }}"
+    image: "{{ virtual_machines[item.virtual_machine_name].image }}"
+    state: "started"
+    recreate: true
+    network: "macvlan-{{ hostvars[item.real_machine_name].network[0].interface }}"
+    ip: "{{ virtual_machines[item.virtual_machine_name].ip }}"
+    etc_hosts: "{{ hosts_list }}"
+    cpus: "{{ virtual_machines[item.virtual_machine_name].cpu_num }}"
+    memory: "{{ virtual_machines[item.virtual_machine_name].memory }}g"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart_policy: "on-failure"
+    systemd: "always"
+    volumes: >
+      [
+        {% if virtual_machines[item.virtual_machine_name].nas_enabled %}
+          "nfs_volume:{{ container_nas_path }}",
+        {% endif %}
+        {% if item.virtual_machine_name[:5] in ['contr'] %}
+          "{{ state_file_volume }}:/var/spool/slurmctld",
+        {% endif %}
+        {% if item.virtual_machine_name[:5] in ['datab'] %}
+          "{{ mysql_data_volume }}:/var/lib/mysql",
+        {% endif %}
+        {% if item.virtual_machine_name[:5] in ['login'] %}
+          "{{ login_auth_file_volume }}:/auth_files",
+        {% endif %}
+      ]
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
+    gpus: "{{ gpu_allocations.get(item.virtual_machine_name, omit) }}"
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ vms }}"
+  run_once: true
+

@@ -1,0 +1,32 @@
+---
+
+- name: stop and remove container if running
+  containers.podman.podman_container:
+    name: "{{ item.virtual_machine_name }}"
+    state: absent
+  loop: "{{ vms }}"
+
+
+- name: create macvlan network
+  containers.podman.podman_network:
+    name: "macvlan-{{ item.interface }}"
+    force: true
+    driver: "macvlan"
+    subnet: "{{ item.subnet }}"
+    gateway: "{{ item.gateway }}"
+    opt:
+      parent: "{{ item.interface }}"
+  loop: "{{ network }}"
+
+
+- name: create nfs volume
+  containers.podman.podman_volume:
+    state: "present"
+    name: "nfs_volume"
+    driver: "local"
+    options:
+      - "type=nfs"
+      - "o=rw"
+      - "device={{ nfs_volume_address }}:{{ remote_nas_path }}"
+  when: nfs_volume_address is defined
+
