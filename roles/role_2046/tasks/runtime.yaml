@@ -14,6 +14,12 @@
     cap_add:
       - NET_ADMIN
       - NET_RAW
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - AUDIT_WRITE
+      - SYS_RAWIO
+      - AUDIT_CONTROL
     restart_policy: "on-failure"
     systemd: "always"
     volumes: >
