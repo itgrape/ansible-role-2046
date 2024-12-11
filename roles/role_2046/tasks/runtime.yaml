@@ -20,10 +20,12 @@
       - AUDIT_WRITE
       - SYS_RAWIO
       - AUDIT_CONTROL
+    cgroupns: "host"
     restart_policy: "on-failure"
     systemd: "always"
     volumes: >
       [
+          "/sys/fs/cgroup:/sys/fs/cgroup:rw",
         {% if virtual_machines[item.virtual_machine_name].nas_enabled %}
           "nfs_volume:{{ container_nas_path }}",
         {% endif %}

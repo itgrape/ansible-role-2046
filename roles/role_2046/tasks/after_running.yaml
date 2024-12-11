@@ -81,7 +81,7 @@
   run_once: true
 
 
-- name: Reload state file
+- name: reload state file
   shell: |
     sleep 30
     podman exec {{ item.virtual_machine_name }} scontrol reconfigure
