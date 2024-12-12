@@ -6,7 +6,7 @@
   loop:
     - "{{ config_file_path }}"
     - "{{ state_file_volume }}"
-    - "{{ login_auth_file_volume }}"
+    - "{{ ldap_file_volume }}"
     - "{{ mysql_data_volume }}"
 
 - name: create slurm.conf
@@ -21,12 +21,6 @@
     src: gres.conf.j2
     dest: "{{ config_file_path }}/gres.conf"
     mode: "0600"
-    lstrip_blocks: true
-
-- name: create minion
-  template:
-    src: minion.j2
-    dest: "{{ config_file_path }}/minion"
     lstrip_blocks: true
 
 - name: create slurmdbd.conf

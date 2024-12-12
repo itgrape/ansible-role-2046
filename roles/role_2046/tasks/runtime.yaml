@@ -11,6 +11,8 @@
     etc_hosts: "{{ hosts_list }}"
     cpus: "{{ virtual_machines[item.virtual_machine_name].cpu_num }}"
     memory: "{{ virtual_machines[item.virtual_machine_name].memory }}g"
+    shm_size: "2g"
+    shm_size_systemd: "2g"
     cap_add:
       - NET_ADMIN
       - NET_RAW
@@ -35,8 +37,8 @@
         {% if item.virtual_machine_name[:5] in ['datab'] %}
           "{{ mysql_data_volume }}:/var/lib/mysql",
         {% endif %}
-        {% if item.virtual_machine_name[:5] in ['login'] %}
-          "{{ login_auth_file_volume }}:/auth_files",
+        {% if item.virtual_machine_name[:5] in ['ldap-'] %}
+          "{{ ldap_file_volume }}:/var/lib/ldap",
         {% endif %}
       ]
     env:

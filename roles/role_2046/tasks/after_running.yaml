@@ -1,18 +1,9 @@
 ---
-- name: import compute file
-  shell: |
-    podman cp {{ config_file_path }}/minion {{ item.virtual_machine_name }}:/etc/salt/minion
-    podman cp {{ config_file_path }}/slurmd_override.conf {{ item.virtual_machine_name }}:/etc/systemd/system/slurmd.service.d/override.conf
-  delegate_to: "{{ item.real_machine_name }}"
-  loop: "{{ compute_node_list }}"
-  run_once: true
-
-
-- name: import login file
+- name: import compute & login file
   shell: |
     podman cp {{ config_file_path }}/slurmd_override.conf {{ item.virtual_machine_name }}:/etc/systemd/system/slurmd.service.d/override.conf
   delegate_to: "{{ item.real_machine_name }}"
-  loop: "{{ login_node_list }}"
+  loop: "{{ compute_node_list + login_node_list }}"
   run_once: true
 
 
@@ -21,7 +12,6 @@
     podman cp {{ config_file_path }}/slurm.conf {{ item.virtual_machine_name }}:/etc/slurm/slurm.conf
     podman cp {{ config_file_path }}/gres.conf {{ item.virtual_machine_name }}:/etc/slurm/gres.conf
     podman cp {{ config_file_path }}/slurmdbd.conf {{ item.virtual_machine_name }}:/etc/slurm/slurmdbd.conf
-    podman cp {{ config_file_path }}/minion {{ item.virtual_machine_name }}:/etc/salt/minion
     podman exec {{ item.virtual_machine_name }} chown slurm /etc/slurm/slurmdbd.conf
     podman exec {{ item.virtual_machine_name }} chmod 644 /etc/slurm/gres.conf
     podman exec {{ item.virtual_machine_name }} chown slurm:slurm /etc/slurm/gres.conf
@@ -29,13 +19,6 @@
     podman exec {{ item.virtual_machine_name }} chmod -R 750 /var/spool/slurmctld
   delegate_to: "{{ item.real_machine_name }}"
   loop: "{{ control_node_list }}"
-  run_once: true
-
-
-- name: import user
-  shell: podman exec {{ item.virtual_machine_name }} user_import.sh
-  delegate_to: "{{ item.real_machine_name }}"
-  loop: "{{ login_node_list }}"
   run_once: true
 
 
@@ -56,28 +39,17 @@
     podman exec {{ item.virtual_machine_name }} systemctl daemon-reload
     podman exec {{ item.virtual_machine_name }} systemctl restart slurmctld
     podman exec {{ item.virtual_machine_name }} systemctl restart slurmdbd
-    podman exec {{ item.virtual_machine_name }} systemctl restart salt-minion
   delegate_to: "{{ item.real_machine_name }}"
   loop: "{{ control_node_list }}"
   run_once: true
 
 
-- name: flush login node
+- name: flush login & compute node
   shell: |
     podman exec {{ item.virtual_machine_name }} systemctl daemon-reload
     podman exec {{ item.virtual_machine_name }} systemctl restart slurmd
   delegate_to: "{{ item.real_machine_name }}"
-  loop: "{{ login_node_list }}"
-  run_once: true
-
-
-- name: flush compute node
-  shell: |
-    podman exec {{ item.virtual_machine_name }} systemctl daemon-reload
-    podman exec {{ item.virtual_machine_name }} systemctl restart slurmd
-    podman exec {{ item.virtual_machine_name }} systemctl restart salt-minion
-  delegate_to: "{{ item.real_machine_name }}"
-  loop: "{{ compute_node_list }}"
+  loop: "{{ login_node_list + compute_node_list }}"
   run_once: true
 
 
@@ -88,4 +60,18 @@
   delegate_to: "{{ item.real_machine_name }}"
   loop: "{{ control_node_list }}"
   run_once: true
+
+
+- name: init ldap
+  shell: |
+    podman exec {{ item.virtual_machine_name }} ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /root/init.ldif
+    podman exec {{ item.virtual_machine_name }} ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /root/access.ldif
+    podman exec {{ item.virtual_machine_name }} ldapadd -x -D 'cn=admin,dc=pushihao,dc=com' -w 'root' -f /root/base.ldif
+    podman exec {{ item.virtual_machine_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+    podman exec {{ item.virtual_machine_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+    podman exec {{ item.virtual_machine_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ ldap_node_list }}"
+  run_once: true
+
 

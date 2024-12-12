@@ -21,7 +21,7 @@ task_after_running_enabled: true
 config_file_path: "/home/admin/slurm_config_file"
 state_file_volume: "/home/admin/state_file"
 mysql_data_volume: "/home/admin/mysql_data"
-login_auth_file_volume: "/home/admin/auth_files"
+ldap_file_volume: "/home/admin/ldap"
 
 remote_nas_path: "/ifs"
 container_nas_path: "/ifs"

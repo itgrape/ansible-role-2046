@@ -1,7 +1,7 @@
 ---
 - name: combine all virtual machines
   set_fact:
-    vms: "{{ control_node_list + login_node_list + database_node_list + compute_node_list }}"
+    vms: "{{ control_node_list + login_node_list + database_node_list + ldap_node_list + compute_node_list }}"
 
 
 - name: set fact for hostname to ip

@@ -10,10 +10,13 @@ database_node_list:
   - virtual_machine_name: "database-node-01"
     real_machine_name: "010-020-020-001"
 
+ldap_node_list:
+  - virtual_machine_name: "ldap-node-01"
+    real_machine_name: "010-020-020-001"
+
 compute_node_list:
   - virtual_machine_name: "gpu-node-01"
     real_machine_name: "010-020-011-083"
   - virtual_machine_name: "gpu-node-02"
     real_machine_name: "010-020-011-084"
-  - virtual_machine_name: "gpu-node-03"
-    real_machine_name: "010-020-011-084"
+
