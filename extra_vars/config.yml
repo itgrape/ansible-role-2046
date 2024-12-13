@@ -10,6 +10,7 @@ nfs_addresses:
   - "10.20.255.8"
 
 task_debug: true
+ldap_init_enabled: true
 
 task_set_vars_enabled: true
 task_generate_templates_enabled: true

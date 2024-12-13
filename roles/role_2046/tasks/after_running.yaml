@@ -8,16 +8,15 @@
     - access.ldif
     - base.ldif
     - init.ldif
-  delegate_to: "{{ item.real_machine_name }}"
-  loop: "{{ ldap_node_list }}"
-  run_once: true
+  when: ldap_init_enabled
 
 
 - name: import ldif file
   shell: |
-    podman cp tmp/access.ldif {{ item.virtual_machine_name }}:/root/access.ldif
-    podman cp tmp/base.ldif {{ item.virtual_machine_name }}:/root/base.ldif
-    podman cp tmp/init.ldif {{ item.virtual_machine_name }}:/root/init.ldif
+    podman cp /tmp/access.ldif {{ item.virtual_machine_name }}:/root/
+    podman cp /tmp/base.ldif {{ item.virtual_machine_name }}:/root/
+    podman cp /tmp/init.ldif {{ item.virtual_machine_name }}:/root/
+  when: ldap_init_enabled
   delegate_to: "{{ item.real_machine_name }}"
   loop: "{{ ldap_node_list }}"
   run_once: true
@@ -86,6 +85,15 @@
   run_once: true
 
 
+- name: nslcd permission
+  shell: |
+    podman exec {{ item.virtual_machine_name }} chmod 640 /etc/nslcd.conf
+    podman exec {{ item.virtual_machine_name }} systemctl restart nslcd
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ control_node_list + login_node_list + compute_node_list }}"
+  run_once: true
+
+
 - name: init ldap
   shell: |
     podman exec {{ item.virtual_machine_name }} ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /root/init.ldif
@@ -94,6 +102,7 @@
     podman exec {{ item.virtual_machine_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
     podman exec {{ item.virtual_machine_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
     podman exec {{ item.virtual_machine_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+  when: ldap_init_enabled
   delegate_to: "{{ item.real_machine_name }}"
   loop: "{{ ldap_node_list }}"
   run_once: true
