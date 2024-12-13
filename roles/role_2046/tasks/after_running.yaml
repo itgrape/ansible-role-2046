@@ -1,4 +1,28 @@
 ---
+- name: copy ldif file
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/{{ item }}"
+    mode: '0644'
+  with_items:
+    - access.ldif
+    - base.ldif
+    - init.ldif
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ ldap_node_list }}"
+  run_once: true
+
+
+- name: import ldif file
+  shell: |
+    podman cp tmp/access.ldif {{ item.virtual_machine_name }}:/root/access.ldif
+    podman cp tmp/base.ldif {{ item.virtual_machine_name }}:/root/base.ldif
+    podman cp tmp/init.ldif {{ item.virtual_machine_name }}:/root/init.ldif
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ ldap_node_list }}"
+  run_once: true
+
+
 - name: import compute & login file
   shell: |
     podman cp {{ config_file_path }}/slurmd_override.conf {{ item.virtual_machine_name }}:/etc/systemd/system/slurmd.service.d/override.conf

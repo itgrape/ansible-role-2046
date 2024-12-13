@@ -10,5 +10,4 @@
 
 
 - name: clean up unused podman images
-  command: "podman image prune -f"
-
+  shell: "podman image prune -f"
