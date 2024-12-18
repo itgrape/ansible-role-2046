@@ -43,7 +43,7 @@
       ]
     env:
       MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
-    gpus: "{{ gpu_allocations.get(item.virtual_machine_name, omit) }}"
+    device: "{{ ['nvidia.com/gpu=' + item for item in gpu_allocations.get(item.virtual_machine_name, '').split(',')] if gpu_allocations.get(item.virtual_machine_name) else omit }}"
   delegate_to: "{{ item.real_machine_name }}"
   loop: "{{ vms }}"
   run_once: true

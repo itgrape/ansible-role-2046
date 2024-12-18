@@ -26,7 +26,7 @@ virtual_machines:
   ldap-node-01:
     image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:openldap"
     ip: "10.20.20.20"
-    public_ip: null
+    public_ip: "10.10.20.5/16"
     memory: 10
     cpu_num: 10
     gpu_num: 0
@@ -47,4 +47,19 @@ virtual_machines:
     cpu_num: 100
     gpu_num: 8
     nas_enabled: true
-
+  gpu-node-03:
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
+    ip: "10.20.12.3"
+    public_ip: null
+    memory: 500
+    cpu_num: 100
+    gpu_num: 10
+    nas_enabled: true
+  gpu-node-04:
+    image: "crpi-g0cm9l3tvvpecg9b.cn-shanghai.personal.cr.aliyuncs.com/pushihao/ohpc:compute"
+    ip: "10.20.12.4"
+    public_ip: null
+    memory: 500
+    cpu_num: 100
+    gpu_num: 10
+    nas_enabled: true

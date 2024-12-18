@@ -19,4 +19,8 @@ compute_node_list:
     real_machine_name: "010-020-011-083"
   - virtual_machine_name: "gpu-node-02"
     real_machine_name: "010-020-011-084"
+  - virtual_machine_name: "gpu-node-03"
+    real_machine_name: "010-020-011-100"
+  - virtual_machine_name: "gpu-node-04"
+    real_machine_name: "010-020-011-101"
 

@@ -5,7 +5,7 @@ slurm_partitions:
     MaxTime: "INFINITE"
     State: "DRAIN"
   - name: "normal"
-    Nodes: "gpu-node-[01-02]"
+    Nodes: "gpu-node-[01-04]"
     Default: "YES"
     MaxTime: "INFINITE"
     State: "UP"

@@ -1,0 +1,15 @@
+network:
+  - interface: "ens102f1np1"
+    subnet: "10.20.0.0/16"
+    gateway: "10.20.20.1"
+
+hardware_info:
+  CPUs: 112
+  Boards: 1
+  SocketsPerBoard: 2
+  CoresPerSocket: 28
+  ThreadsPerCore: 2
+  Memory: 500
+  GPU:
+    type: "RTX3090"
+    num: 10

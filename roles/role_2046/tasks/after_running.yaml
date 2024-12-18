@@ -53,7 +53,7 @@
     podman exec {{ item.virtual_machine_name }} ip link set eth1 up
     podman exec {{ item.virtual_machine_name }} ip route add default via {{ hostvars[item.real_machine_name].network[1].gateway }} dev eth1 proto static metric 50
   delegate_to: "{{ item.real_machine_name }}"
-  loop: "{{ login_node_list }}"
+  loop: "{{ login_node_list + ldap_node_list }}"
   run_once: true
 
 
