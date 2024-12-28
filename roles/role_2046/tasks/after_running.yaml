@@ -76,24 +76,6 @@
   run_once: true
 
 
-- name: reload state file
-  shell: |
-    sleep 30
-    podman exec {{ item.virtual_machine_name }} scontrol reconfigure
-  delegate_to: "{{ item.real_machine_name }}"
-  loop: "{{ control_node_list }}"
-  run_once: true
-
-
-- name: nslcd permission
-  shell: |
-    podman exec {{ item.virtual_machine_name }} chmod 640 /etc/nslcd.conf
-    podman exec {{ item.virtual_machine_name }} systemctl restart nslcd
-  delegate_to: "{{ item.real_machine_name }}"
-  loop: "{{ control_node_list + login_node_list + compute_node_list }}"
-  run_once: true
-
-
 - name: init ldap
   shell: |
     podman exec {{ item.virtual_machine_name }} ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /root/init.ldif
@@ -105,6 +87,15 @@
   when: ldap_init_enabled
   delegate_to: "{{ item.real_machine_name }}"
   loop: "{{ ldap_node_list }}"
+  run_once: true
+
+
+- name: reload state file
+  shell: |
+    sleep 30
+    podman exec {{ item.virtual_machine_name }} scontrol reconfigure
+  delegate_to: "{{ item.real_machine_name }}"
+  loop: "{{ control_node_list }}"
   run_once: true
 
 

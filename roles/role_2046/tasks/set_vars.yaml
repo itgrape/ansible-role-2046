@@ -16,12 +16,10 @@
     gpu_allocations: {}
     current_cpu_index: {}
     cpu_allocations: {}
-- name: calucate gpu and cpu allocation variable
+- name: calucate gpu allocation variable
   set_fact:
     gpu_allocations: "{{ gpu_allocations | combine({ item.virtual_machine_name: gpu_indices }) }}"
     current_gpu_index: "{{ current_gpu_index | combine({ item.real_machine_name: new_gpu_index }) }}"
-    cpu_allocations: "{{ cpu_allocations | combine({ item.virtual_machine_name: cpu_indices }) }}"
-    current_cpu_index: "{{ current_cpu_index | combine({ item.real_machine_name: new_cpu_index }) }}"
   vars:
     gpu_indices: >-
       {{
@@ -31,15 +29,9 @@
         ) | list | map('string') | join(',')
       }}
     new_gpu_index: "{{ (current_gpu_index[item.real_machine_name] | default(0) | int) + (virtual_machines[item.virtual_machine_name].gpu_num | int) }}"
-    cpu_start: "{{ (current_cpu_index[item.real_machine_name] | default(0)) | int }}"
-    cpu_end: "{{ ((current_cpu_index[item.real_machine_name] | default(0)) | int) + (virtual_machines[item.virtual_machine_name].cpu_num | int) - 1 }}"
-    cpu_indices: "{{ cpu_start ~ '-' ~ cpu_end }}"
-    new_cpu_index: "{{ (current_cpu_index[item.real_machine_name] | default(0) | int) + (virtual_machines[item.virtual_machine_name].cpu_num | int) }}"
   when:
     - virtual_machines[item.virtual_machine_name].gpu_num is defined
     - virtual_machines[item.virtual_machine_name].gpu_num > 0
-    - virtual_machines[item.virtual_machine_name].cpu_num is defined
-    - virtual_machines[item.virtual_machine_name].cpu_num > 0
   loop: "{{ vms }}"
 - name: Debug gpu info
   debug:
@@ -47,6 +39,19 @@
   when:
     - gpu_allocations is defined
     - task_debug
+- name: calucate cpu allocation variable
+  set_fact:
+    cpu_allocations: "{{ cpu_allocations | combine({ item.virtual_machine_name: cpu_indices }) }}"
+    current_cpu_index: "{{ current_cpu_index | combine({ item.real_machine_name: new_cpu_index }) }}"
+  vars:
+    cpu_start: "{{ (current_cpu_index[item.real_machine_name] | default(0)) | int }}"
+    cpu_end: "{{ ((current_cpu_index[item.real_machine_name] | default(0)) | int) + (virtual_machines[item.virtual_machine_name].cpu_num | int) - 1 }}"
+    cpu_indices: "{{ cpu_start ~ '-' ~ cpu_end }}"
+    new_cpu_index: "{{ (current_cpu_index[item.real_machine_name] | default(0) | int) + (virtual_machines[item.virtual_machine_name].cpu_num | int) }}"
+  when:
+    - virtual_machines[item.virtual_machine_name].cpu_num is defined
+    - virtual_machines[item.virtual_machine_name].cpu_num > 0
+  loop: "{{ vms }}"
 - name: Debug cpu info
   debug:
     msg: "{{ cpu_allocations }}"

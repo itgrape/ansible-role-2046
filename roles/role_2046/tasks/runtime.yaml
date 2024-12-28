@@ -24,10 +24,11 @@
       - AUDIT_CONTROL
     cgroupns: "host"
     restart_policy: "on-failure"
-    systemd: "always"
+    systemd: "true"
     volumes: >
       [
           "/sys/fs/cgroup:/sys/fs/cgroup:rw",
+          "/etc/localtime:/etc/localtime:ro",
         {% if virtual_machines[item.virtual_machine_name].nas_enabled %}
           "nfs_volume:{{ container_nas_path }}",
         {% endif %}
@@ -43,7 +44,7 @@
       ]
     env:
       MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
-    device: "{{ ['nvidia.com/gpu=' + item for item in gpu_allocations.get(item.virtual_machine_name, '').split(',')] if gpu_allocations.get(item.virtual_machine_name) else omit }}"
+    device: "{{ gpu_allocations.get(item.virtual_machine_name) | split(',') | map('regex_replace', '^', 'nvidia.com/gpu=') if gpu_allocations.get(item.virtual_machine_name) else omit }}"
   delegate_to: "{{ item.real_machine_name }}"
   loop: "{{ vms }}"
   run_once: true
